@@ -5,7 +5,7 @@ Celem projektu jest implementacja, badanie symulacyjne oraz analityczna weryfika
 
 Projekt koncentruje się na wyznaczeniu optymalnej szerokości okna (horyzontu) $H_{\text{opt}} \in [2, 100]$ minimalizującej błąd średniokwadratowy (MSE) oraz zbadaniu zjawiska kompromisu między obciążeniem a wariancją (*bias–variance tradeoff*) w zależności od:
 1. Dynamiki zmian sygnału rzeczywistego (nachylenie trendu $\alpha$).
-2. Poziomu zakłóceń pomiarowych (wariancja szumu $\text{Var}(z_k)$).
+2. Poziomu zakłóceń pomiarowych (wariancja szumu $$\text{Var}(z_k)$$).
 
 ---
 
@@ -18,41 +18,65 @@ gdzie $\alpha > 0$ jest współczynnikiem kierunkowym trendu.
 
 ### 2.2. Model pomiaru i zakłócenia
 Wartość zmierzona w chwili $k$ stanowi sumę sygnału rzeczywistego oraz błędu pomiarowego:
-$$\theta_k = \theta_k^* + z_k$$
+
+$$
+\theta_k = \theta_k^* + z_k
+$$
 
 Błąd pomiarowy $z_k$ jest ciągiem niezależnych zmiennych losowych (i.i.d.) o symetrycznym rozkładzie trójkątnym na przedziale $[-a, a]$:
-- Wartość oczekiwana:
-  $$\mathbb{E}[z_k] = 0$$
+- Wartość oczekiwana: $\mathbb{E}[z_k] = 0$
 - Funkcja gęstości prawdopodobieństwa (PDF):
-  $$f(z) = \begin{cases} \frac{a - |z|}{a^2} & \text{dla } |z| \le a \\ 0 & \text{dla } |z| > a \end{cases}$$
-- Wariancja szumu:
-  $$\text{Var}(z_k) = \sigma_z^2 = \frac{a^2}{6} \implies a = \sqrt{6\sigma_z^2}$$
+
+  $$
+  f(z) = \begin{cases} 
+  \frac{a - |z|}{a^2} & \text{dla } |z| \le a \\ 
+  0 & \text{dla } |z| > a 
+  \end{cases}
+  $$
+
+- Wariancja szumu: $\text{Var}(z_k) = \sigma_z^2 = \frac{a^2}{6} \implies a = \sqrt{6\sigma_z^2}$
 
 ### 2.3. Estymator okna ruchomego (SMA)
 Estymata wartości sygnału w chwili $k$ wyznaczana jest jako średnia arytmetyczna z ostatnich $H$ pomiarów:
-$$\hat{\theta}_k = \frac{1}{H} \sum_{i=0}^{H-1} \theta_{k-i}, \quad H \in [2, 100]$$
+
+$$
+\hat{\theta}_k = \frac{1}{H} \sum_{i=0}^{H-1} \theta_{k-i}, \quad H \in [2, 100]
+$$
 
 ---
 
 ## 3. Analiza teoretyczna: Dekompozycja MSE (Bias-Variance)
 
 Błąd średniokwadratowy estymatora dekomponuje się na kwadrat obciążenia oraz wariancję:
-$$\text{MSE}(H) = \mathbb{E}\left[(\hat{\theta}_k - \theta_k^*)^2\right] = \text{Bias}^2(\hat{\theta}_k) + \text{Var}(\hat{\theta}_k)$$
+
+$$
+\text{MSE}(H) = \mathbb{E}\left[(\hat{\theta}_k - \theta_k^*)^2\right] = \text{Bias}^2(\hat{\theta}_k) + \text{Var}(\hat{\theta}_k)
+$$
 
 ### 3.1. Obciążenie (Bias)
 Wartość oczekiwana estymatora wynosi:
-$$\mathbb{E}[\hat{\theta}_k] = \frac{1}{H} \sum_{i=0}^{H-1} \mathbb{E}[\theta_{k-i}] = \frac{1}{H} \sum_{i=0}^{H-1} \alpha(k - i) = \alpha k - \frac{\alpha}{H} \sum_{i=0}^{H-1} i = \alpha k - \frac{\alpha (H - 1)}{2}$$
 
-Obciążenie:
-$$\text{Bias}(\hat{\theta}_k) = \mathbb{E}[\hat{\theta}_k] - \theta_k^* = -\frac{\alpha (H - 1)}{2}$$
+$$
+\mathbb{E}[\hat{\theta}_k] = \frac{1}{H} \sum_{i=0}^{H-1} \mathbb{E}[\theta_{k-i}] = \alpha k - \frac{\alpha (H - 1)}{2}
+$$
+
+Obciążenie: $\text{Bias}(\hat{\theta}_k) = \mathbb{E}[\hat{\theta}_k] - \theta_k^* = -\frac{\alpha (H - 1)}{2}$
 
 Kwadrat obciążenia (rośnie monotonicznie z kwadratem długości okna $H$):
-$$\text{Bias}^2(H) = \frac{\alpha^2 (H - 1)^2}{4}$$
+
+$$
+\text{Bias}^2(H) = \frac{\alpha^2 (H - 1)^2}{4}
+$$
 
 ### 3.2. Wariancja (Variance)
 Ponieważ pomiary są sumą wartości deterministycznej i nieskorelowanych zakłóceń $z_k$:
-$$\text{Var}(\hat{\theta}_k) = \text{Var}\left( \frac{1}{H} \sum_{i=0}^{H-1} z_{k-i} \right) = \frac{1}{H^2} \sum_{i=0}^{H-1} \text{Var}(z_{k-i}) = \frac{\sigma_z^2}{H}$$
+
+$$
+\text{Var}(\hat{\theta}_k) = \text{Var}\left( \frac{1}{H} \sum_{i=0}^{H-1} z_{k-i} \right) = \frac{\sigma_z^2}{H}
+$$
+
 Wariancja maleje wraz ze wzrostem horyzontu $H$.
+
 
 ### 3.3. Teoretyczna funkcja MSE i minimum analityczne
 $$\text{MSE}(H) = \frac{\alpha^2 (H - 1)^2}{4} + \frac{\sigma_z^2}{H}$$
