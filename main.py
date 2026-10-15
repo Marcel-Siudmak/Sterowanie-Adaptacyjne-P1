@@ -40,5 +40,25 @@ def moving_average(measure, H):
     weights = np.ones(H) / H
     return np.convolve(measure, weights, mode='valid')
 
+# funkcja symulacji Monte Carlo
+def monte_carlo_mse(N, M, H_max, alpha, var_z):
+    H_values = np.arange(2, H_max + 1)       # Badane okna H od 2 do 100
+    mse_emp = np.zeros(len(H_values))        # Pusta tablica na sumę błędów dla każdego H
+    k_steady = N - H_max                     # Liczba próbek dla k >= H_max (po odcięciu rozbiegówki)
+
+    for _ in range(M):                       # Pętla Monte Carlo (M powtórzeń)
+        t, signal, measure = generate_measurments(N, alpha, var_z)
+        
+        for i, H in enumerate(H_values):     # Pętla po wszystkich oknach H = 2..100
+            est = moving_average(measure, H)
+            
+            # Bierzemy ostatnie k_steady próbek z obu tablic (chwile k >= H_max)
+            blad = est[-k_steady:] - signal[-k_steady:]
+            mse_emp[i] += np.mean(blad ** 2) # Dodajemy średni kwadrat błędu z tego przebiegu
+
+    return H_values, mse_emp / M             # Zwracamy H oraz błąd uśredniony przez M powtórzeń
+
 if __name__=='__main__':
     main()
+
+
