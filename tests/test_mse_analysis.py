@@ -1,13 +1,15 @@
 import unittest
 import numpy as np
 from pathlib import Path
-import tempfile
 import sys
 
-# Dodanie katalogu src do sys.path
 sys.path.append(str(Path(__file__).resolve().parent.parent / "src"))
 
-from mse_analysis import compute_empirical_mse, plot_mse_curve
+from mse_analysis import (
+    compute_empirical_mse,
+    plot_empirical_mse_curve,
+    plot_theory_comparison_curve,
+)
 
 
 class TestMSEAnalysis(unittest.TestCase):
@@ -24,7 +26,7 @@ class TestMSEAnalysis(unittest.TestCase):
         self.assertFalse(np.isnan(mse).any())
         self.assertTrue((mse > 0).all())
 
-    def test_plot_mse_curve_runs(self):
+    def test_plot_empirical_curve_runs(self):
         import matplotlib
 
         matplotlib.use("Agg")
@@ -35,8 +37,28 @@ class TestMSEAnalysis(unittest.TestCase):
         mse = np.linspace(10, 1, 10).tolist() + np.linspace(1, 10, 10).tolist()
         mse = np.array(mse)
 
-        plot_mse_curve(ax, H_range, mse, alpha=0.02, var_z=25.0)
+        h_opt, min_mse = plot_empirical_mse_curve(ax, H_range, mse, alpha=0.02, var_z=25.0)
         self.assertGreater(len(ax.lines), 0)
+        self.assertEqual(h_opt, 10)
+        plt.close(fig)
+
+    def test_plot_theory_comparison_curve_runs(self):
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        fig, ax = plt.subplots()
+        H_range = np.arange(1, 21)
+        mse = np.linspace(10, 1, 10).tolist() + np.linspace(1, 10, 10).tolist()
+        mse = np.array(mse)
+
+        h_opt_emp, min_mse_emp, h_opt_theo, min_mse_theo = plot_theory_comparison_curve(
+            ax, H_range, mse, alpha=0.02, var_z=25.0
+        )
+        self.assertGreater(len(ax.lines), 1)
+        self.assertEqual(h_opt_emp, 10)
+        self.assertGreater(h_opt_theo, 0)
         plt.close(fig)
 
 
