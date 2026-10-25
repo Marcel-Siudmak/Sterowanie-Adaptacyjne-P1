@@ -20,7 +20,7 @@ from theory import (
 
 # STAŁE KONFIGURACYJNE
 ALPHA = 0.02        # nachylenie trendu (Wariant 2 z README)
-VAR_Z = 25.0        # wariancja szumu (Wariant 2 z README)
+VAR_Z = 1           # wariancja szumu (Wariant 2 z README)
 H_MAX = 100         # maksymalny horyzont
 PLOTS_DIR = Path(__file__).resolve().parent.parent / "plots"
 
@@ -70,21 +70,21 @@ def plot_decomposition(
         color="tab:blue",
         linewidth=2.5,
     )
-
-    # 2. Punkt minimum i linia optymalnego horyzontu
-    plt.axvline(
-        x=h_opt,
-        color="gray",
-        linestyle=":",
-        linewidth=1.5,
-        label=f"Optymalny horyzont $H_{{opt}} = {h_opt}$",
-    )
+    #
+    # # 2. Punkt minimum i linia optymalnego horyzontu
+    # plt.axvline(
+    #     x=h_opt,
+    #     color="gray",
+    #     linestyle=":",
+    #     linewidth=1.5,
+    #     label=f"Optymalny horyzont $H_{{opt}} = {h_opt}$",
+    # )
     plt.plot(h_opt, min_mse, marker="o", markersize=7, color="tab:blue")
 
     plt.annotate(
         f"Minimum $\\mathrm{{MSE}}$\n$H_{{opt}} = {h_opt}$\n$\\mathrm{{MSE}}_{{min}} = {min_mse:.3f}$",
         xy=(h_opt, min_mse),
-        xytext=(h_opt + 10, min_mse + 2.0),
+        xytext=(h_opt + 1, min_mse + 0.2),
         arrowprops=dict(arrowstyle="->", color="tab:blue", lw=1.2),
         fontsize=10,
         bbox=dict(boxstyle="round,pad=0.4", facecolor="white", edgecolor="tab:blue", alpha=0.9),
@@ -99,7 +99,6 @@ def plot_decomposition(
     plt.grid(True, linestyle=":", alpha=0.6)
     plt.legend(loc="upper right", fontsize=10)
     plt.xlim(1, H_max)
-    plt.ylim(0, max(25.0, min_mse * 4))
     plt.tight_layout()
 
     if save_path:
